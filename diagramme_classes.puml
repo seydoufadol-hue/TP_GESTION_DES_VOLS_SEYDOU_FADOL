@@ -1,0 +1,111 @@
+@startuml
+title Agence de voyage - Diagramme de classes
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+enum StatutReservation {
+  EN_ATTENTE
+  VALIDEE
+  ANNULEE
+}
+enum ModePaiement {
+  ESPECES
+  CARTE
+  MOBILE_MONEY
+}
+enum StatutRemboursement {
+  AUCUN
+  EN_ATTENTE_REMBOURSEMENT
+}
+
+class Passager {
+  - id : int
+  - nom : string
+  - prenom : string
+  - telephone : string
+  - passeport : string
+  + Passager(id, nom, prenom, telephone, passeport)
+  + getId() : int
+  + getNom() : string
+  + getPrenom() : string
+  + getPasseport() : string
+  + afficher() : void
+}
+
+class Vol {
+  - numero : string
+  - depart : string
+  - destination : string
+  - date : string
+  - heure : string
+  - capacite : int
+  - prix : double
+  + Vol(numero, depart, destination, date, heure, capacite, prix)
+  + placesReservees() : int
+  + placesConfirmees() : int
+  + placesDisponibles() : int
+  + estComplet() : bool
+  + estReservePar(p : Passager) : bool
+  + ajouterReservation(r : Reservation) : void
+  + afficher() : void
+}
+
+class Reservation {
+  - id : int
+  - dateCreation : string
+  - statut : StatutReservation
+  + Reservation(id, passager, vol)
+  + valider() : void
+  + annuler() : void
+  + estPayee() : bool
+  + estAnnulee() : bool
+  + afficher() : void
+}
+
+class Paiement {
+  - id : int
+  - montant : double
+  - mode : ModePaiement
+  - statutRemboursement : StatutRemboursement
+  - montantRembourse : double
+  + Paiement(id, reservation, montant, mode)
+  + marquerARembourser(taux : double) : void
+  + afficher() : void
+}
+
+class AgenceVoyage {
+  - passagers : vector<Passager>
+  - vols : vector<Vol>
+  - reservations : vector<Reservation>
+  - paiements : vector<Paiement>
+  + enregistrerPassager() : void
+  + ajouterVol() : void
+  + afficherVolsDisponibles() : void
+  + rechercherVol() : void
+  + effectuerReservation() : void
+  + enregistrerPaiement() : void
+  + annulerReservation() : void
+  + consulterReservations() : void
+  + afficherReservation() : void
+  + executer() : void
+}
+
+Reservation --> StatutReservation
+Paiement --> ModePaiement
+Paiement --> StatutRemboursement
+
+Passager "1" -- "0..*" Reservation : effectue >
+Vol "1" -- "0..*" Reservation : concerne >
+Reservation "1" -- "0..1" Paiement : est réglée par >
+
+AgenceVoyage "1" o-- "0..*" Passager
+AgenceVoyage "1" o-- "0..*" Vol
+AgenceVoyage "1" o-- "0..*" Reservation
+AgenceVoyage "1" o-- "0..*" Paiement
+
+note bottom of Reservation
+  Contrainte : (passager, vol) unique
+  Annulée => plus de paiement possible
+  Payée puis annulée => remboursement
+end note
+@enduml
